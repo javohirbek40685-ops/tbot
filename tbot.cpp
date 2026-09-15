@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -6,9 +7,12 @@
 #include "json.hpp"
 
 using json = nlohmann::json;
+const char* env_bot = std::getenv("BOT_TOKEN");
+const char* env_gemini = std::getenv("GEMINI_API_KEY");
 
-const std::string BOT_TOKEN = ""; // BotFather tokeningiz
-const std::string GEMINI_API_KEY = ""; // AI Studio'dan olgan kalitingiz (AIzaSy...)
+const std::string BOT_TOKEN = env_bot ? env_bot : "";
+const std::string GEMINI_API_KEY = env_gemini ? env_gemini : "";
+
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* userp) {
     userp->append((char*)contents, size * nmemb);
