@@ -1,4 +1,3 @@
-cat << 'EOF' > tbot.cpp
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -40,16 +39,14 @@ std::string sendHttpRequest(const std::string& url, const std::string& postData)
     return response;
 }
 
-// Gemini API orqali javob olish (Ism va shaxsiyat berilgan)
 std::string getAIResponse(const std::string& prompt) {
     std::string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
     
     json req;
-    // Tizim ko'rsatmasi: Bot kimligini anglatish
     req["system_instruction"]["parts"]["text"] = 
-        "Sening isming Voice. Sen Javohirbekning shaxsiy sun'iy intellekt yordamchisisan. "
-        "Foydalanuvchilarga Javohirbek nomidan xushmuomala va o'zbek tilida javob ber. "
-        "O'zingni hech qachon OpenAI yoki boshqa model deb atama!";
+        "Sening isming Voice. Sen Javohirbekning shaxsiy sun'iy intellekt yordamchisi va virtual ovozisan. "
+        "Foydalanuvchilarga Javohirbek nomidan xushmuomala, aniq va o'zbek tilida javob ber. "
+        "O'zingni hech qachon OpenAI yoki boshqa model deb atama, har doim Voice ekanligingni bildir.";
 
     json msg_content;
     msg_content["role"] = "user";
@@ -83,7 +80,7 @@ int main() {
     long long last_update_id = 0;
 
     while (true) {
-        std::string url = "https://api.telegram.org/bot" + BOT_TOKEN + "/getUpdates?offset=" + std::to_str(last_update_id + 1) + "&timeout=30";
+        std::string url = "https://api.telegram.org/bot" + BOT_TOKEN + "/getUpdates?offset=" + std::to_string(last_update_id + 1) + "&timeout=30";
         std::string resp = sendHttpRequest(url, "");
         
         try {
@@ -95,7 +92,6 @@ int main() {
                     if (update.contains("business_message")) {
                         auto msg = update["business_message"];
 
-                        // 1. CHEKSIZ YOZISHUVNI TO'XTATISH: Botlardan kelgan xabarlarni ignore qilish
                         if (msg.contains("from") && msg["from"].contains("is_bot")) {
                             if (msg["from"]["is_bot"].get<bool>()) {
                                 std::cout << "Boshqa bot xabari e'tiborsiz qoldirildi." << std::endl;
@@ -103,7 +99,6 @@ int main() {
                             }
                         }
 
-                        // 2. Text xabar bo'lsa javob berish
                         if (msg.contains("text")) {
                             std::string user_text = msg["text"].get<std::string>();
                             std::string business_conn_id = msg.contains("business_connection_id") ? msg["business_connection_id"].get<std::string>() : "";
@@ -121,5 +116,4 @@ int main() {
     }
     return 0;
 }
-EOF
 
