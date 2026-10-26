@@ -40,18 +40,13 @@ std::string sendHttpRequest(const std::string& url, const std::string& postData)
 }
 
 std::string getAIResponse(const std::string& prompt) {
-    // gemini-1.5-flash o'rniga gemini-pro ishlatamiz
-    std::string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY;
+    // Eng so'nggi barqaror format
+    std::string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
     
     json req;
-    // Tizim ko'rsatmasi to'g'ri JSON array formatida
-    req["system_instruction"]["parts"] = json::array({ 
-        { {"text", "Sening isming Voice. Sen Javohirbekning shaxsiy sun'iy intellekt yordamchisi va virtual ovozisan. Foydalanuvchilarga Javohirbek nomidan xushmuomala, aniq va o'zbek tilida javob ber. O'zingni hech qachon OpenAI yoki boshqa model deb atama, har doim Voice ekanligingni bildir."} } 
-    });
-
     json msg_content;
     msg_content["role"] = "user";
-    msg_content["parts"] = json::array({ { {"text", prompt} } });
+    msg_content["parts"] = json::array({ { {"text", "Sening isming Voice. Sen Javohirbekning shaxsiy yordamchisan. Savol: " + prompt} } });
     req["contents"] = json::array({ msg_content });
 
     std::string resp = sendHttpRequest(url, req.dump());
@@ -68,6 +63,7 @@ std::string getAIResponse(const std::string& prompt) {
     
     return "Hozircha javob bera olmayman.";
 }
+
 
 void sendTelegramMessage(long long chat_id, const std::string& text, const std::string& business_conn_id) {
     std::string url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
