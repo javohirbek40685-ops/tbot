@@ -43,10 +43,10 @@ std::string getAIResponse(const std::string& prompt) {
     std::string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
     
     json req;
-    req["system_instruction"]["parts"]["text"] = 
-        "Sening isming Voice. Sen Javohirbekning shaxsiy sun'iy intellekt yordamchisi va virtual ovozisan. "
-        "Foydalanuvchilarga Javohirbek nomidan xushmuomala, aniq va o'zbek tilida javob ber. "
-        "O'zingni hech qachon OpenAI yoki boshqa model deb atama, har doim Voice ekanligingni bildir.";
+    // Tizim ko'rsatmasi to'g'ri JSON array formatida
+    req["system_instruction"]["parts"] = json::array({ 
+        { {"text", "Sening isming Voice. Sen Javohirbekning shaxsiy sun'iy intellekt yordamchisi va virtual ovozisan. Foydalanuvchilarga Javohirbek nomidan xushmuomala, aniq va o'zbek tilida javob ber. O'zingni hech qachon OpenAI yoki boshqa model deb atama, har doim Voice ekanligingni bildir."} } 
+    });
 
     json msg_content;
     msg_content["role"] = "user";
@@ -58,8 +58,12 @@ std::string getAIResponse(const std::string& prompt) {
         auto j = json::parse(resp);
         if (j.contains("candidates") && !j["candidates"].empty()) {
             return j["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
+        } else if (j.contains("error")) {
+            std::cout << "API Error: " << j["error"]["message"].get<std::string>() << std::endl;
         }
-    } catch (...) {}
+    } catch (const std::exception& e) {
+        std::cout << "JSON Parse error: " << e.what() << std::endl;
+    }
     
     return "Hozircha javob bera olmayman.";
 }
