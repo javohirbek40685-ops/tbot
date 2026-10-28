@@ -40,7 +40,6 @@ std::string sendHttpRequest(const std::string& url, const std::string& postData)
 }
 
 std::string getAIResponse(const std::string& prompt) {
-    // Eng so'nggi barqaror format
     std::string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + GEMINI_API_KEY;
     
     json req;
@@ -50,12 +49,21 @@ std::string getAIResponse(const std::string& prompt) {
     req["contents"] = json::array({ msg_content });
 
     std::string resp = sendHttpRequest(url, req.dump());
+    
+    // Terminalda API nima javob berganini ko'rish uchun chiqaramiz
+    std::cout << "API Response: " << resp << std::endl;
+
     try {
         auto j = json::parse(resp);
         if (j.contains("candidates") && !j["candidates"].empty()) {
-            return j["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
+            auto candidate = j["candidates"][0];
+            if (candidate.contains("content") && candidate["content"].contains("parts") && !candidate["content"]["parts"].empty()) {
+                return candidate["content"]["parts"][0]["text"].get<std::string>();
+            }
         } else if (j.contains("error")) {
-            std::cout << "API Error: " << j["error"]["message"].get<std::string>() << std::endl;
+            std::string err_msg = j["error"]["message"].get<std::string>();
+            std::cout << "Gemini API Error details: " << err_msg << std::endl;
+            return "Xatolik: " + err_msg;
         }
     } catch (const std::exception& e) {
         std::cout << "JSON Parse error: " << e.what() << std::endl;
@@ -63,7 +71,6 @@ std::string getAIResponse(const std::string& prompt) {
     
     return "Hozircha javob bera olmayman.";
 }
-
 
 void sendTelegramMessage(long long chat_id, const std::string& text, const std::string& business_conn_id) {
     std::string url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
