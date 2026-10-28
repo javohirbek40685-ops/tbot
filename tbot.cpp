@@ -40,7 +40,8 @@ std::string sendHttpRequest(const std::string& url, const std::string& postData)
 }
 
 std::string getAIResponse(const std::string& prompt) {
-    std::string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY;
+    std::string url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=" + GEMINI_API_KEY;
+
     
     json req;
     json msg_content;
